@@ -87,19 +87,7 @@ backend web_servers    # секция бэкенд
 - Настройте Nginx так, чтобы файлы .jpg выдавались самим Nginx (предварительно разместите несколько тестовых картинок в директории /var/www/), а остальные запросы переадресовывались на HAProxy, который в свою очередь переадресовывал их на два Simple Python server.
 - На проверку направьте конфигурационные файлы nginx, HAProxy, скриншоты с запросами jpg картинок и других файлов на Simple Python Server, демонстрирующие корректную настройку.
 
-```
-Скрипт web.sh
-#!/bin/bash
-
-if nc -z localhost 80 && [ -f /var/www/html/index.nginx-debian.html ]; then
-    exit 0
-else
-    exit 1
-fi
-```
-
-![Задание2.1](https://github.com/ddponomarev/09_1/blob/master/img/zad2_1.png)
-
+---
 ### Задание 4*
 - Запустите 4 simple python сервера на разных портах.
 - Первые два сервера будут выдавать страницу index.html вашего сайта example1.local (в файле index.html напишите example1.local)
@@ -109,14 +97,40 @@ fi
 - На проверку направьте конфигурационный файл HAProxy, скриншоты, демонстрирующие запросы к разным фронтендам и ответам от разных бэкендов.
 
 ```
-Скрипт web.sh
-#!/bin/bash
+Конфигурация haproxy.cfg
+listen stats  # веб-страница со статистикой
+        bind                    :888
+        mode                    http
+        stats                   enable
+        stats uri               /stats
+        stats refresh           5s
+        stats realm             Haproxy\ Statistics
 
-if nc -z localhost 80 && [ -f /var/www/html/index.nginx-debian.html ]; then
-    exit 0
-else
-    exit 1
-fi
+frontend example  # секция фронтенд
+        mode http
+        bind :8088
+        acl is_example1 hdr(host) -i example1.local
+        acl is_example2 hdr(host) -i example2.local
+        use_backend web_s1 if is_example1
+        use_backend web_s2 if is_example2
+
+backend web_s1 # секция бэкенд1
+        mode http
+        balance roundrobin
+        option httpchk
+        http-check send meth GET uri /index.html
+        server s1 127.0.0.1:8881 check inter 3s
+        server s2 127.0.0.1:8882 check inter 3s
+
+backend web_s2 # секция бэкенд2
+        mode http
+        balance roundrobin
+        option httpchk
+        http-check send meth GET uri /index.html
+        server s1 127.0.0.1:9991 check inter 3s
+        server s2 127.0.0.1:9992 check inter 3s
 ```
 
-![Задание2.1](https://github.com/ddponomarev/09_1/blob/master/img/zad2_1.png)
+![Задание4](https://github.com/ddponomarev/09_2/blob/master/img/z4.png)
+
+![Задание4.1](https://github.com/ddponomarev/09_2/blob/master/img/z4_1.png)
