@@ -42,7 +42,7 @@ listen web_tcp
 ```
 
 
-![Задание1](https://github.com/ddponomarev/09_1/blob/master/img/z1.png)
+![Задание1](https://github.com/ddponomarev/09_2/blob/master/img/z1.png)
 
 ---
 
