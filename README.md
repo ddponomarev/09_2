@@ -53,46 +53,33 @@ listen web_tcp
 - На проверку направьте конфигурационный файл haproxy, скриншоты, где видно перенаправление запросов на разные серверы при обращении к HAProxy c использованием домена example.local и без него.
 
 ```
-Скрипт web.sh
-#!/bin/bash
+Конфигурация haproxy.cfg
+listen stats  # веб-страница со статистикой
+        bind                    :888
+        mode                    http
+        stats                   enable
+        stats uri               /stats
+        stats refresh           5s
+        stats realm             Haproxy\ Statistics
 
-if nc -z localhost 80 && [ -f /var/www/html/index.nginx-debian.html ]; then
-    exit 0
-else
-    exit 1
-fi
+frontend example  # секция фронтенд
+        mode http
+        bind :8088
+        acl ACL_example_local hdr(host) -i example.local
+        use_backend web_servers if ACL_example_local
+
+backend web_servers    # секция бэкенд
+        mode http
+        balance roundrobin
+        option httpchk
+        http-check send meth GET uri /index.html
+        server s1 127.0.0.1:8888 weight 2 check inter 3s
+        server s2 127.0.0.1:9999 weight 3 check inter 3s
+        server s3 127.0.0.1:7777 weight 4 check inter 3s
 ```
 
+![Задание2](https://github.com/ddponomarev/09_2/blob/master/img/z2.png)
 
-```
-Конфигурация keepalived.conf
-#!/bin/bash
-
-vrrp_script check_web {
-        script "/etc/keepalived/web.sh"
-        interval 3
-}
-
-vrrp_instance VI_1 {
-        state MASTER
-        interface ens3
-        virtual_router_id 50
-        priority 255
-        advert_int 1
-
-        virtual_ipaddress {
-              192.168.0.50/24
-        }
-
-        track_script {
-              check_web
-        }
-}
-```
-
-![Задание2.1](https://github.com/ddponomarev/09_1/blob/master/img/zad2_1.png)
-
-![Задание2.2](https://github.com/ddponomarev/09_1/blob/master/img/zad2_2.png)
 ---
 
 ### Задание 3*
