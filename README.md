@@ -96,7 +96,7 @@ backend web_servers    # секция бэкенд
 - Настройте фронтенд HAProxy так, чтобы в зависимости от запрашиваемого сайта example1.local или example2.local запросы перенаправлялись на разные бэкенды HAProxy
 - На проверку направьте конфигурационный файл HAProxy, скриншоты, демонстрирующие запросы к разным фронтендам и ответам от разных бэкендов.
 
-![Конфигурация](https://github.com/ddponomarev/09_2/blob/master/cfg/4/haproxy.cfg)
+ - [Конфигурация](https://github.com/ddponomarev/09_2/blob/master/cfg/4/haproxy.cfg)
 
 ![Задание4](https://github.com/ddponomarev/09_2/blob/master/img/z4.png)
 
